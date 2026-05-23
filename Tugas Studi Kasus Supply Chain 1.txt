@@ -1,0 +1,48 @@
+Tugas Studi Kasus: Supply Chain Management pada Perusahaan Elektronik
+Latar Belakang
+PT ElectroMax adalah perusahaan elektronik yang memproduksi smartphone dan gadget pintar. Perusahaan memiliki rantai pasok yang cukup luas, mulai dari pemasok komponen internasional, manufaktur di dalam negeri, gudang pusat, distributor regional, hingga toko retail dan e-commerce.
+Beberapa fakta terkait supply chain PT ElectroMax:
+Supplier:
+3 supplier komponen utama: chip, layar, baterai.
+Supplier chip berlokasi di Taiwan, layar di Korea Selatan, baterai di Indonesia.
+Manufacturing:
+Pabrik utama berada di Jakarta dan Surabaya.
+Kapasitas produksi per bulan: 50.000 unit.
+Warehouse & Distribution:
+2 gudang pusat di Jakarta dan Surabaya.
+Sistem distribusi ke 5 kota besar dan 20 kota menengah.
+Retail & E-commerce:
+50 toko offline, 3 platform online resmi.
+Konsumen memberikan feedback secara digital dan offline.
+Tantangan:
+Fluktuasi permintaan gadget selama musim promo dan liburan.
+Keterlambatan pengiriman komponen akibat masalah logistik internasional.
+Biaya penyimpanan gudang meningkat selama high season.
+
+Apabila anda menjadi konsulatan PT ElectroMax:
+Identifikasi komponen yang menjadi bottleneck dalam rantai pasok.
+Analisis risiko dari dependency pada supplier internasional dan usulkan strategi mitigasinya.
+Rancang strategi untuk mengurangi biaya gudang tanpa mengurangi ketersediaan produk.
+Usulkan metode peramalan permintaan agar perusahaan tidak kelebihan atau kekurangan stok selama musim promo.
+
+JAWABAN
+1. 
+a. Supplier Chip dari Taiwan, beresiko mengalami keterlambatan dengan variabel lebih banyak dibanding supplier lokal.
+b. Kapasitas produksi hanya 50k/bulan, tidak sanggup melayani lonjakan demand secara tiba-tiba.
+
+2.
+a. fluktuasi kurs mata uang -> mengikat harga /range maksimal perubahan harga untuk periode tertentu melalui perjanjian/kontrak
+b. dependensi itu sendiri, yaitu ketergantungan penuh pada 1 supplier utama -> bekerja sama dengan lebih dari 1 supplier per bahan, perlahan mengurangi dependensi.
+c. Pengiriman internasional memiliki resiko keterlambatan yang lebih besar karena dipengaruhi lebih banyak variabel eksternal/lead time -> mempersiapkan safety stock sesuai estimasi leadtime/beralih ke supplier lokal
+
+3.
+menggunakan strategi Leagile karena selain mengurangi biaya penyimpanan dan tidak menggangu ketersediaan produk, PT Electromax juga berhadapan dengan fluktuasi demand. Tetapi ada harga yang harus dibayar, yaitu ketersedian sistem realtime reporting dan automasi, bergantung pada akurasi hasil forecasting, dan penentuan decoupling point yang tepat.
+
+4.
+-Forecasting pertama/awal akan tetap didasarkan oleh penjualan Musim Promo tahun-tahun sebelumnya.
+ 
+-Lalu selama musim promo berjalan, adaptasi akan didasarkan forecast per minggu. (lebih pendek dari biasanya = forecast perbulan).
+
+-Dapat disandingkan dengan Analytics digital marketing (iklan) dan metrics engagement social media. Mendeteksi lonjakan engagment/lonjakan metrics.
+
+-Menggunakan AI untuk memahami feedback kualitatif dari konsumen untuk menambah insight terkait demand sekitar Musim Promo.	
