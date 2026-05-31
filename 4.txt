@@ -1,0 +1,63 @@
+1. 
+QC focuses reactive inspection and testing in order  to meeting specifications and identify defects 
+Ex: Line testing for mobile phones automated/manually
+
+while QA is planning a system to ensure  certain level of quality. 
+Example: QA evaluate all current manufacturing processes and adjust if existing ones failed to deliver certain level of quality
+
+2. 
+a. 50.5-49.5/6x0.15=1.0/0.9 = 1.11
+b. 
+50.5-50.1/3x0.15=0.4/0.45 = 0.89 = Cpu
+50.1-49.5/3x0.15=0.6/0.45 = 1.33 = Cpl
+
+CPK lower than 1.00 indicates that the process is capable of meeting customer requirements.
+
+3a
+
+Surface Coating Defects
+│
+├── Material
+│   └── New supplier
+│       └── Questionable material quality
+│
+├── Machine
+│   └── Paint pressure sensors inaccurate
+│       └── No periodic maintenance
+│           └── Sensors not recalibrated
+│
+├── Method
+│   └── Inadequate drying/curing process
+│
+├── Man (People)
+│   ├── Operators not following SOP
+│   │   └── Supervisors do not enforce SOP
+│   │
+│   └── Insufficient employee training
+│       └── Company budget does not prioritize training
+│
+└── Environment
+    └── Unstable storage conditions
+        ├── Humidity fluctuations
+        ├── Temperature fluctuations
+        └── Airflow variations. 
+
+3b.
+Why are there coating defects?
+Because the coating is not applied evenly to the surface.
+
+Why the coating is not applied evenly?
+Because the paint machine spray output is not stable
+
+Why are the outputs not stable ?
+After inspection its found that air pressure sensors have not been calibrated according to the maintenance schedule. Thus resulting the machine to operate with fluctuative air pressure, while still showign the "normal air pressure level" on the display.
+
+4a. 0.95×0.95×0.95= 0.857375 = 86.74%
+b. 1−(0.05x0.05x0.05) = 0.999875 = 99.99%
+
+5a.
+based on the Sigma DPMO table, 2700 DPMO falls on the range between 4.0 to 4.5 sigma level
+b. 
+	- Prevent defects by prioritizing planning a fixed schedule for periodic inspection&maintenance. Requires testing and evaluation to achieve minimal downtime
+  	while keeping defect risks low.. And then standardize the procedure.
+	- Prioritize employee training and SOP enforcement. Increase employee awareness of the quality, safety, and financial impacts of negligence, emphasizing how non-compliance can undermine 	process standardization and quality improvement efforts. Enforce compliance through supervision, performance monitoring, and accountability measures.
