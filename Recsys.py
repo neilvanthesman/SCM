@@ -200,12 +200,8 @@ left_settings, right_settings = st.columns([1, 1])
 with left_settings:
 
     st.subheader("Audio Features")
-    st.markdown(
-    "[Learn more about Audio Features]"
-    "(https://developer.spotify.com/documentation/web-api/reference/get-audio-features)"
-    )
     st.info(
-        "Recommended: choose at least 3 features.\n\n"
+        "Recommended: choose at least 3 features. [Learn more about Audio Features](https://developer.spotify.com/documentation/web-api/reference/get-audio-features)\n\n"
         "Loudness and Tempo are experimental and generally not recommended."
     )
 
