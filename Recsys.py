@@ -220,76 +220,86 @@ recommendations = st.session_state.recommendations
 
 if recommendations is not None:
 
-    display_df = recommendations[
-        ["artists", "name"]
-    ].copy()
+    left_col, right_col = st.columns([1, 1])
 
-    display_df.columns = [
-        "Artist",
-        "Track"
-    ]
+    # ───────────────── Left Side ─────────────────
+    with left_col:
 
-    st.dataframe(
-        display_df,
-        hide_index=True,
-        use_container_width=True
-    )
+        st.subheader("Recommendations")
 
-    st.subheader("Which songs do you like?")
+        display_df = recommendations[
+            ["artists", "name"]
+        ].copy()
 
-    with st.form("feedback_form"):
+        display_df.columns = [
+            "Artist",
+            "Track"
+        ]
 
-        liked_song_ids = []
-
-        for _, row in recommendations.iterrows():
-
-            label = (
-                f"{row['artists']} - {row['name']}"
-            )
-
-            checked = st.checkbox(
-                label,
-                key=f"song_{row['song_id']}"
-            )
-
-            if checked:
-                liked_song_ids.append(
-                    row["song_id"]
-                )
-
-        submitted = st.form_submit_button(
-            "Submit Feedback"
+        st.dataframe(
+            display_df,
+            hide_index=True,
+            use_container_width=True
         )
 
-        if submitted:
+    # ───────────────── Right Side ─────────────────
+    with right_col:
 
-            record = {
-                "timestamp":
-                    datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
+        st.subheader("Which songs do you like?")
 
-                "visitor_id":
-                    st.session_state.visitor_id,
+        with st.form("feedback_form"):
 
-                "query_song":
-                    st.session_state.query_song,
+            liked_song_ids = []
 
-                "recommended_song_ids":
-                    json.dumps(
-                        recommendations["song_id"].tolist()
-                    ),
+            for _, row in recommendations.iterrows():
 
-                "liked_song_ids":
-                    json.dumps(
-                        liked_song_ids
+                label = (
+                    f"{row['artists']} - {row['name']}"
+                )
+
+                checked = st.checkbox(
+                    label,
+                    key=f"song_{row['song_id']}"
+                )
+
+                if checked:
+                    liked_song_ids.append(
+                        row["song_id"]
                     )
-            }
 
-            sheet.append_row(
-                list(record.values())
+            submitted = st.form_submit_button(
+                "Submit Feedback"
             )
 
-            st.success(
-                "Feedback submitted successfully!"
-            )
+            if submitted:
+
+                record = {
+                    "timestamp":
+                        datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+
+                    "visitor_id":
+                        st.session_state.visitor_id,
+
+                    "query_song":
+                        st.session_state.query_song,
+
+                    "recommended_song_ids":
+                        json.dumps(
+                            recommendations["song_id"].tolist()
+                        ),
+
+                    "liked_song_ids":
+                        json.dumps(
+                            liked_song_ids
+                        )
+                }
+
+                sheet.append_row(
+                    list(record.values())
+                )
+
+                st.success(
+                    "Feedback submitted successfully!"
+                )
