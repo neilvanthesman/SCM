@@ -93,7 +93,7 @@ def load_data():
         "tempo"
     ]
 
-    data[audio_features] = data[audio_features].fillna(0)
+    data[all_features] = data[all_features].fillna(0)
     data["artists"] = data["artists"].fillna("")
 
     data["artists"] = (
@@ -112,20 +112,8 @@ def load_data():
     ).reset_index(drop=True)
 
 
-    return data, audio_matrix
+    return data
 
-
-data, audio_matrix = load_data()
-
-if len(selected_features) == 0:
-    st.warning("Please select at least one audio feature.")
-    st.stop()
-
-scaler = StandardScaler()
-
-audio_matrix = scaler.fit_transform(
-    data[selected_features]
-)
 
 # ─────────────────────────────────────────────────────────────
 # Recommendation Function
@@ -224,6 +212,16 @@ selected_features = st.multiselect(
     'acousticness',
     'instrumentalness'
     ]
+)
+
+if len(selected_features) == 0:
+    st.warning("Please select at least one audio feature.")
+    st.stop()
+
+scaler = StandardScaler()
+
+audio_matrix = scaler.fit_transform(
+    data[selected_features]
 )
 
 top_n = st.slider(
