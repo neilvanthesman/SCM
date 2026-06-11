@@ -26,6 +26,10 @@ st.set_page_config(
 
 st.title("✧ Spotify Explore")
 
+st.markdown("""
+This project recommends you songs solely by Technical similarity without gathering your personal information.
+[Find out how](https://github.com/neilvanthesman/Machine-Learning/blob/main/README.md)
+""")
 
 # ─────────────────────────────────────────────────────────────
 # Session State Initialization
@@ -190,16 +194,19 @@ with col2:
 # ─────────────────────────────────────────────────────────────
 # Feature Selection + Number of Recommendations
 # ─────────────────────────────────────────────────────────────
-left_settings, right_settings = st.columns([2, 1])
+left_settings, right_settings = st.columns([1, 1])
 
 # ───────────────── Left Side ─────────────────
 with left_settings:
 
     st.subheader("Audio Features")
-
+    st.markdown(
+    "[Learn more about Audio Features]"
+    "(https://developer.spotify.com/documentation/web-api/reference/get-audio-features)"
+    )
     st.info(
         "Recommended: choose at least 3 features.\n\n"
-        "⚠️ Loudness and Tempo are experimental and generally not recommended."
+        "Loudness and Tempo are experimental and generally not recommended."
     )
 
     selected_features = st.multiselect(
