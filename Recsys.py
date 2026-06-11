@@ -300,14 +300,15 @@ if recommendations is not None:
         st.subheader("Recommendations")
 
         for _, row in recommendations.iterrows():
-        
-        st.markdown(
-            f"##### {row['name']}"
-        )
-        
-        st.caption(
-            f"by {row['artists']}"
-        )
+            st.markdown(
+                                f"""
+            <h5 style="margin-bottom:0;">🎵 {row['name']}</h5>
+            <p style="margin-top:0;color:gray;">
+            by {row['artists']}
+            </p>
+            """,
+                                unsafe_allow_html=True
+                            )
 
     with right_col:
 
