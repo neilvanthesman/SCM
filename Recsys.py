@@ -25,14 +25,15 @@ st.set_page_config(
 )
 
 st.title("✧ Spotify Explore")
+st.caption("Discover songs through audio similarity")
 
-st.markdown("""
+with st.expander("ℹ How is this different from Spotify?"):
+
+    st.markdown("""
+Spotify's recommendation engine uses listening history, popularity, collaborative filtering, and many proprietary factors.
 This project recommends songs solely by technical similarity without gathering your personal information.
-
-[Find out how](https://github.com/neilvanthesman/Machine-Learning/blob/main/README.md)
-""")
-
-
+[Find out how it works on GitHub](https://github.com/neilvanthesman/Machine-Learning/blob/main/README.md)
+"""
 # -------------------------------------------------
 # Session State
 # -------------------------------------------------
@@ -271,17 +272,25 @@ if st.button("Recommend Songs"):
 
     st.session_state.query_song = query
 
-    st.session_state.recommendations = get_recommendations(
-        query,
-        top_n
-    )
+    with st.spinner("Finding similar songs..."):
+
+        st.session_state.recommendations = get_recommendations(
+            query,
+            top_n
+        )
 
 
 # -------------------------------------------------
 # Display Recommendations
 # -------------------------------------------------
 recommendations = st.session_state.recommendations
-
+if (
+    recommendations is None
+    and st.session_state.query_song != ""
+):
+    st.warning(
+        "Song not found.\n\nTry another artist or title."
+    )
 if recommendations is not None:
 
     left_col, right_col = st.columns([2, 1])
@@ -290,25 +299,24 @@ if recommendations is not None:
 
         st.subheader("Recommendations")
 
-        display_df = recommendations[
-            ["artists", "name"]
-        ].copy()
-
-        display_df.columns = [
-            "Artist",
-            "Track"
-        ]
-
-        st.dataframe(
-            display_df,
-            hide_index=True,
-            use_container_width=True
-        )
+        for _, row in recommendations.iterrows():
+        
+            with st.container(border=True):
+        
+                st.markdown(
+                    f"###  {row['name']}"
+                )
+        
+                st.caption(
+                    f"by {row['artists']}"
+                )
 
     with right_col:
 
         st.subheader("Which songs do you like?")
-
+        st.markdown(
+        "*Feedback is greatly appreciated to improve this app.* ❤️"
+)
         with st.form("feedback_form"):
 
             liked_song_ids = []
@@ -362,3 +370,8 @@ if recommendations is not None:
                 st.success(
                     "Feedback submitted successfully!"
                 )
+st.divider()
+
+st.caption(
+    "Spotify Explore"
+)
