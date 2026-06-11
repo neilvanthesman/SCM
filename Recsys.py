@@ -83,10 +83,11 @@ def load_data():
     data = pd.read_csv(CSV_PATH)
 
     audio_features = [
-        "energy",
-        "loudness",
-        "acousticness",
-        "valence"
+    'danceability',
+    'energy',
+    'valence',
+    'acousticness',
+    'instrumentalness'
     ]
 
     data[audio_features] = data[audio_features].fillna(0)
