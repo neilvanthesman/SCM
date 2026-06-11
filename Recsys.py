@@ -20,22 +20,24 @@ from google.oauth2.service_account import Credentials
 # ─────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Spotify Song Recommender",
-    page_icon="🎵",
+    page_icon="✧",
     layout="wide"
 )
 
-st.title("🎵 Spotify Song Recommender")
-
-st.write(
-    "Enter an artist and song title to receive similar songs."
-)
+st.title("✧ Spotify Explore")
 
 
 # ─────────────────────────────────────────────────────────────
-# Visitor ID
+# Session State Initialization
 # ─────────────────────────────────────────────────────────────
 if "visitor_id" not in st.session_state:
     st.session_state.visitor_id = str(uuid.uuid4())[:8]
+
+if "recommendations" not in st.session_state:
+    st.session_state.recommendations = None
+
+if "query_song" not in st.session_state:
+    st.session_state.query_song = ""
 
 
 # ─────────────────────────────────────────────────────────────
@@ -59,7 +61,7 @@ sheet = gc.open_by_key(
 
 
 # ─────────────────────────────────────────────────────────────
-# Download CSV if needed
+# Download CSV
 # ─────────────────────────────────────────────────────────────
 CSV_URL = (
     "https://raw.githubusercontent.com/"
@@ -69,8 +71,7 @@ CSV_URL = (
 CSV_PATH = "spotify.csv"
 
 if not os.path.exists(CSV_PATH):
-    with st.spinner("Downloading dataset..."):
-        urllib.request.urlretrieve(CSV_URL, CSV_PATH)
+    urllib.request.urlretrieve(CSV_URL, CSV_PATH)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -135,12 +136,10 @@ def get_recommendations(combined_name_query, top_n=10):
     origin_artist = data.loc[idx, "artists"].lower()
     origin_mode = data.loc[idx, "mode"]
 
-    # Stage 1: remove same artist
     candidate_mask = (
         data["artists"].str.lower() != origin_artist
     )
 
-    # Stage 2: same mode only
     candidate_mask &= (
         data["mode"] == origin_mode
     )
@@ -192,107 +191,109 @@ with col2:
 
 top_n = st.slider(
     "Number of recommendations",
-    min_value=1,
-    max_value=20,
-    value=10
+    1,
+    20,
+    10
 )
 
 
 # ─────────────────────────────────────────────────────────────
-# Recommend
+# Recommend Button
 # ─────────────────────────────────────────────────────────────
 if st.button("Recommend Songs"):
 
-    if artist == "" or song == "":
-        st.warning("Please fill both fields.")
+    query = f"{artist} <> {song}"
 
-    else:
+    st.session_state.query_song = query
 
-        query = f"{artist} <> {song}"
+    st.session_state.recommendations = get_recommendations(
+        query,
+        top_n
+    )
 
-        recommendations = get_recommendations(
-            query,
-            top_n
+
+# ─────────────────────────────────────────────────────────────
+# Display Recommendations
+# ─────────────────────────────────────────────────────────────
+recommendations = st.session_state.recommendations
+
+if recommendations is not None:
+
+    display_df = recommendations[
+        ["artists", "name"]
+    ].copy()
+
+    display_df.columns = [
+        "Artist",
+        "Track"
+    ]
+
+    st.dataframe(
+        display_df,
+        hide_index=True,
+        use_container_width=True
+    )
+
+    st.subheader("Which songs do you like?")
+
+    with st.form("feedback_form"):
+
+        liked_song_ids = []
+
+        for _, row in recommendations.iterrows():
+
+            label = (
+                f"{row['artists']} - {row['name']}"
+            )
+
+            checked = st.checkbox(
+                label,
+                key=f"song_{row['song_id']}"
+            )
+
+            if checked:
+                liked_song_ids.append(
+                    int(row["song_id"])
+                )
+
+        submitted = st.form_submit_button(
+            "Submit Feedback"
         )
 
-        if recommendations is None:
+        if submitted:
 
-            st.error("Song not found.")
+            record = {
+                "timestamp":
+                    datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
 
-        else:
+                "visitor_id":
+                    st.session_state.visitor_id,
 
-            st.success("Recommendations found!")
+                "query_song":
+                    st.session_state.query_song,
 
-            display_df = recommendations[
-                ["artists", "name"]
-            ].copy()
+                "recommended_song_ids":
+                    json.dumps(
+                        [
+                            int(x)
+                            for x in recommendations[
+                                "song_id"
+                            ].tolist()
+                        ]
+                    ),
 
-            display_df.columns = [
-                "Artist",
-                "Track"
-            ]
-
-            st.dataframe(
-                display_df,
-                hide_index=True,
-                use_container_width=True
-            )
-
-            st.subheader(
-                "Which songs do you like?"
-            )
-
-            liked_song_ids = []
-
-            for _, row in recommendations.iterrows():
-
-                label = (
-                    f"{row['artists']} - "
-                    f"{row['name']}"
-                )
-
-                if st.checkbox(
-                    label,
-                    key=f"song_{row['song_id']}"
-                ):
-                    liked_song_ids.append(
-                        int(row["song_id"])
+                "liked_song_ids":
+                    json.dumps(
+                        liked_song_ids
                     )
+            }
 
-            if st.button("Submit Feedback"):
+            sheet.append_row(
+                list(record.values())
+            )
 
-                record = {
-                    "timestamp":
-                        datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-
-                    "visitor_id":
-                        st.session_state.visitor_id,
-
-                    "query_song":
-                        query,
-
-                    "recommended_song_ids":
-                        json.dumps(
-                            [
-                                int(x)
-                                for x in recommendations[
-                                    "song_id"
-                                ].tolist()
-                            ]
-                        ),
-
-                    "liked_song_ids":
-                        json.dumps(
-                            liked_song_ids
-                        )
-                }
-
-                sheet.append_row(
-                    list(record.values())
-                )
-
-                st.success(
-                    "Feedback submitted successfully!"
-                )
+            st.success(
+                "Feedback submitted successfully!"
+            )
