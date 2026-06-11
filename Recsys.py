@@ -10,14 +10,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 # ── Page Configuration ──────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Spotify Song Recommender",
-    page_icon="🎵",
+    page_icon="✮",
     layout="wide"
 )
 
-st.title("🎵 Spotify Song Recommender")
+st.title("Spotify Explore")
 st.write(
-    "Get similar songs based on audio features.\n\n"
-    "Songs by the same artist are excluded, and only songs with the same mode (major/minor) are considered."
+    "Get similar songs based on audio features provided by Spotify API.\n\n"
+    "Songs by the same artist are excluded"
 )
 
 # ── Download spotify.csv if not already present ─────────────────────────────
@@ -151,20 +151,21 @@ if st.button("Recommend Songs"):
         else:
             st.success(f"Top {top_n} recommendations")
 
-            display_df = recommendations.copy()
-            display_df["similarity_score"] = (
-                display_df["similarity_score"].round(3)
-            )
+            display_df = recommendations[["artists", "name"]].copy()
+
+            display_df.columns = ["Artist", "Track"]
 
             st.dataframe(
                 display_df,
-                use_container_width=True
+                use_container_width=True,
+                hide_index=True
             )
+            
 
             csv = recommendations.to_csv(index=False)
 
             st.download_button(
-                label="📥 Download CSV",
+                label="Download CSV",
                 data=csv,
                 file_name="recommendations.csv",
                 mime="text/csv"
