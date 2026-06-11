@@ -254,7 +254,7 @@ if recommendations is not None:
 
             if checked:
                 liked_song_ids.append(
-                    int(row["song_id"])
+                    row["song_id"]
                 )
 
         submitted = st.form_submit_button(
@@ -277,12 +277,7 @@ if recommendations is not None:
 
                 "recommended_song_ids":
                     json.dumps(
-                        [
-                            int(x)
-                            for x in recommendations[
-                                "song_id"
-                            ].tolist()
-                        ]
+                        recommendations["song_id"].tolist()
                     ),
 
                 "liked_song_ids":
