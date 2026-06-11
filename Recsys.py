@@ -85,7 +85,8 @@ def load_data():
     audio_features = [
         "energy",
         "loudness",
-        "acousticness"
+        "acousticness",
+        "valence"
     ]
 
     data[audio_features] = data[audio_features].fillna(0)
