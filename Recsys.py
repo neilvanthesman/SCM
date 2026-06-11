@@ -82,12 +82,15 @@ def load_data():
 
     data = pd.read_csv(CSV_PATH)
 
-    audio_features = [
-    'danceability',
-    'energy',
-    'valence',
-    'acousticness',
-    'instrumentalness'
+    all_features = [
+        "danceability",
+        "liveness",
+        "valence",
+        "energy",
+        "instrumentalness",
+        "acousticness",
+        "loudness",
+        "tempo"
     ]
 
     data[audio_features] = data[audio_features].fillna(0)
@@ -108,17 +111,21 @@ def load_data():
         subset=["combined_name"]
     ).reset_index(drop=True)
 
-    scaler = StandardScaler()
-
-    audio_matrix = scaler.fit_transform(
-        data[audio_features]
-    )
 
     return data, audio_matrix
 
 
 data, audio_matrix = load_data()
 
+if len(selected_features) == 0:
+    st.warning("Please select at least one audio feature.")
+    st.stop()
+
+scaler = StandardScaler()
+
+audio_matrix = scaler.fit_transform(
+    data[selected_features]
+)
 
 # ─────────────────────────────────────────────────────────────
 # Recommendation Function
@@ -191,6 +198,33 @@ with col2:
         "Song Title",
         placeholder="Yellow"
     )
+st.subheader("Audio Features")
+
+st.info(
+    "Recommended: choose at least 3 features.\n\n"
+    "Loudness and Tempo are experimental and generally not recommended."
+)
+
+selected_features = st.multiselect(
+    "Select audio features used for similarity",
+    options=[
+        "danceability",
+        "liveness",
+        "valence",
+        "energy",
+        "instrumentalness",
+        "acousticness",
+        "loudness",
+        "tempo"
+    ],
+    default=[
+    'danceability',
+    'energy',
+    'valence',
+    'acousticness',
+    'instrumentalness'
+    ]
+)
 
 top_n = st.slider(
     "Number of recommendations",
