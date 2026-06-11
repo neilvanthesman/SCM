@@ -201,7 +201,7 @@ with left_settings:
 
     st.subheader("Audio Features")
     st.info(
-        "Recommended: choose at least 3 features. [Learn more about Audio Features](https://developer.spotify.com/documentation/web-api/reference/get-audio-features)\n\n"
+        "Recommended: choose at least 3 features. [Learn more about Audio Features](https://developer.spotify.com/documentation/web-api/reference/get-audio-features)\n"
         "Loudness and Tempo are experimental and generally not recommended."
     )
 
