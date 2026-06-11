@@ -33,7 +33,7 @@ with st.expander("ℹ How is this different from Spotify?"):
 Spotify's recommendation engine uses listening history, popularity, collaborative filtering, and many proprietary factors.
 This project recommends songs solely by technical similarity without gathering your personal information.
 [Find out how it works on GitHub](https://github.com/neilvanthesman/Machine-Learning/blob/main/README.md)
-"""
+""")
 # -------------------------------------------------
 # Session State
 # -------------------------------------------------
@@ -373,5 +373,5 @@ if recommendations is not None:
 st.divider()
 
 st.caption(
-    "Spotify Explore"
+    "Spotify Explore - Build with Python & Streamlit"
 )
