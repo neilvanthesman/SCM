@@ -323,7 +323,7 @@ if recommendations is not None:
 
             for _, row in recommendations.iterrows():
 
-                label = f"{row['###artists']} - {row['###name']}"
+                label = f"{row['### artists']} - {row['### name']}"
 
                 checked = st.checkbox(
                     label,
