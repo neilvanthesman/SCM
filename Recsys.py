@@ -220,7 +220,7 @@ recommendations = st.session_state.recommendations
 
 if recommendations is not None:
 
-    left_col, right_col = st.columns([1, 1])
+    left_col, right_col = st.columns([2, 1])
 
     # ───────────────── Left Side ─────────────────
     with left_col:
