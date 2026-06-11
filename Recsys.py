@@ -186,67 +186,63 @@ with col2:
         "Song Title",
         placeholder="Yellow"
     )
-st.subheader("Audio Features")
-
-st.info(
-    "Recommended: choose at least 3 features.\n\n"
-    "Loudness and Tempo are experimental and generally not recommended."
-)
-
-selected_features = st.multiselect(
-    "Select audio features used for similarity",
-    options=[
-        "danceability",
-        "liveness",
-        "valence",
-        "energy",
-        "instrumentalness",
-        "acousticness",
-        "loudness",
-        "tempo"
-    ],
-    default=[
-    'danceability',
-    'energy',
-    'valence',
-    'acousticness',
-    'instrumentalness'
-    ]
-)
-
-if len(selected_features) == 0:
-    st.warning("Please select at least one audio feature.")
-    st.stop()
-
-scaler = StandardScaler()
-
-audio_matrix = scaler.fit_transform(
-    data[selected_features]
-)
-
-top_n = st.slider(
-    "Number of recommendations",
-    1,
-    20,
-    10
-)
-
-
+    
 # ─────────────────────────────────────────────────────────────
-# Recommend Button
+# Feature Selection + Number of Recommendations
 # ─────────────────────────────────────────────────────────────
-if st.button("Recommend Songs"):
+left_settings, right_settings = st.columns([2, 1])
 
-    query = f"{artist} <> {song}"
+# ───────────────── Left Side ─────────────────
+with left_settings:
 
-    st.session_state.query_song = query
+    st.subheader("Audio Features")
 
-    st.session_state.recommendations = get_recommendations(
-        query,
-        top_n
+    st.info(
+        "Recommended: choose at least 3 features.\n\n"
+        "⚠️ Loudness and Tempo are experimental and generally not recommended."
     )
 
+    selected_features = st.multiselect(
+        "Select audio features used for similarity",
+        options=[
+            "danceability",
+            "liveness",
+            "valence",
+            "energy",
+            "instrumentalness",
+            "acousticness",
+            "loudness",
+            "tempo"
+        ],
+        default=[
+            "danceability",
+            "energy",
+            "valence",
+            "acousticness",
+            "instrumentalness"
+        ]
+    )
 
+    if len(selected_features) == 0:
+        st.warning("Please select at least one audio feature.")
+        st.stop()
+
+    if len(selected_features) < 3:
+        st.warning(
+            "Using fewer than 3 features may produce less reliable recommendations."
+        )
+
+# ───────────────── Right Side ─────────────────
+with right_settings:
+
+    st.subheader("Settings")
+
+    top_n = st.slider(
+        "Number of recommendations",
+        min_value=1,
+        max_value=20,
+        value=10
+    )
 # ─────────────────────────────────────────────────────────────
 # Display Recommendations
 # ─────────────────────────────────────────────────────────────
