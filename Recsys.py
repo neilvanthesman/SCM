@@ -246,6 +246,20 @@ with right_settings:
         max_value=20,
         value=10
     )
+
+# ─────────────────────────────────────────────────────────────
+# Recommend Button
+# ─────────────────────────────────────────────────────────────
+if st.button("Recommend Songs"):
+
+    query = f"{artist} <> {song}"
+
+    st.session_state.query_song = query
+
+    st.session_state.recommendations = get_recommendations(
+        query,
+        top_n
+    )
 # ─────────────────────────────────────────────────────────────
 # Display Recommendations
 # ─────────────────────────────────────────────────────────────
