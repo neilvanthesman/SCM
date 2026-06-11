@@ -304,7 +304,7 @@ if recommendations is not None:
             with st.container(border=True):
         
                 st.markdown(
-                    f"###  {row['name']}"
+                    f"#### {row['name']}"
                 )
         
                 st.caption(
