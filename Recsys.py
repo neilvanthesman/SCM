@@ -27,7 +27,7 @@ st.set_page_config(
 st.title("✧ Spotify Explore")
 st.caption("Discover songs through audio similarity")
 
-with st.expander("ℹ How is this different from Spotify?"):
+with st.expander("(ℹ) How is this different from Spotify?"):
 
     st.markdown("""
 Spotify's recommendation engine uses listening history, popularity, collaborative filtering, and many proprietary factors.
@@ -293,7 +293,7 @@ if (
     )
 if recommendations is not None:
 
-    left_col, right_col = st.columns([2, 1])
+    left_col, right_col = st.columns([2, 1.5])
 
     with left_col:
 
@@ -315,7 +315,7 @@ if recommendations is not None:
 
         st.subheader("Which songs do you like?")
         st.markdown(
-        "*Feedback is greatly appreciated to improve this app.* ❤️"
+        "*Feedback is greatly appreciated to improve this app.* "
 )
         with st.form("feedback_form"):
 
@@ -323,7 +323,7 @@ if recommendations is not None:
 
             for _, row in recommendations.iterrows():
 
-                label = f"{row['artists']} - {row['name']}"
+                label = f"{row['###artists']} - {row['###name']}"
 
                 checked = st.checkbox(
                     label,
