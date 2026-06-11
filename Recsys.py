@@ -15,9 +15,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 from google.oauth2.service_account import Credentials
 
 
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
 # Page Config
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
 st.set_page_config(
     page_title="Spotify Song Recommender",
     page_icon="✧",
@@ -27,13 +27,15 @@ st.set_page_config(
 st.title("✧ Spotify Explore")
 
 st.markdown("""
-This project recommends you songs solely by Technical similarity without gathering your personal information.
+This project recommends songs solely by technical similarity without gathering your personal information.
+
 [Find out how](https://github.com/neilvanthesman/Machine-Learning/blob/main/README.md)
 """)
 
-# ─────────────────────────────────────────────────────────────
-# Session State Initialization
-# ─────────────────────────────────────────────────────────────
+
+# -------------------------------------------------
+# Session State
+# -------------------------------------------------
 if "visitor_id" not in st.session_state:
     st.session_state.visitor_id = str(uuid.uuid4())[:8]
 
@@ -44,9 +46,9 @@ if "query_song" not in st.session_state:
     st.session_state.query_song = ""
 
 
-# ─────────────────────────────────────────────────────────────
-# Google Sheets Connection
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
+# Google Sheets
+# -------------------------------------------------
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -64,9 +66,9 @@ sheet = gc.open_by_key(
 ).sheet1
 
 
-# ─────────────────────────────────────────────────────────────
-# Download CSV
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
+# Download Dataset
+# -------------------------------------------------
 CSV_URL = (
     "https://raw.githubusercontent.com/"
     "neilvanthesman/Machine-Learning/refs/heads/main/spotify.csv"
@@ -78,9 +80,9 @@ if not os.path.exists(CSV_PATH):
     urllib.request.urlretrieve(CSV_URL, CSV_PATH)
 
 
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
 # Load Data
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
 @st.cache_data
 def load_data():
 
@@ -115,13 +117,15 @@ def load_data():
         subset=["combined_name"]
     ).reset_index(drop=True)
 
-
     return data
+
+
 data = load_data()
 
-# ─────────────────────────────────────────────────────────────
+
+# -------------------------------------------------
 # Recommendation Function
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
 def get_recommendations(combined_name_query, top_n=10):
 
     matches = data[
@@ -168,15 +172,14 @@ def get_recommendations(combined_name_query, top_n=10):
 
     recommendations = data.iloc[top_global_idx].copy()
 
-    # Use Spotify IDs already present in the dataset
     recommendations["song_id"] = recommendations["id"]
 
     return recommendations
 
 
-# ─────────────────────────────────────────────────────────────
-# Inputs
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
+# Song Inputs
+# -------------------------------------------------
 col1, col2 = st.columns(2)
 
 with col1:
@@ -190,19 +193,24 @@ with col2:
         "Song Title",
         placeholder="Yellow"
     )
-    
-# ─────────────────────────────────────────────────────────────
-# Feature Selection + Number of Recommendations
-# ─────────────────────────────────────────────────────────────
+
+
+# -------------------------------------------------
+# Settings
+# -------------------------------------------------
 left_settings, right_settings = st.columns([1, 1])
 
-# ───────────────── Left Side ─────────────────
 with left_settings:
 
     st.subheader("Audio Features")
+
     st.info(
-        "Recommended: choose at least 3 features. [Learn more about Audio Features](https://developer.spotify.com/documentation/web-api/reference/get-audio-features)\n"
+        "Recommended: choose at least 3 features.\n"
         "Loudness and Tempo are experimental and generally not recommended."
+    )
+
+    st.markdown(
+        "[Learn more about Audio Features](https://developer.spotify.com/documentation/web-api/reference/get-audio-features)"
     )
 
     selected_features = st.multiselect(
@@ -235,21 +243,31 @@ with left_settings:
             "Using fewer than 3 features may produce less reliable recommendations."
         )
 
-# ───────────────── Right Side ─────────────────
 with right_settings:
 
     st.subheader("Settings")
 
     top_n = st.slider(
         "Number of recommendations",
-        min_value=1,
-        max_value=20,
-        value=10
+        1,
+        20,
+        10
     )
 
-# ─────────────────────────────────────────────────────────────
+
+# -------------------------------------------------
+# Create Audio Matrix
+# -------------------------------------------------
+scaler = StandardScaler()
+
+audio_matrix = scaler.fit_transform(
+    data[selected_features]
+)
+
+
+# -------------------------------------------------
 # Recommend Button
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
 if st.button("Recommend Songs"):
 
     query = f"{artist} <> {song}"
@@ -260,16 +278,17 @@ if st.button("Recommend Songs"):
         query,
         top_n
     )
-# ─────────────────────────────────────────────────────────────
+
+
+# -------------------------------------------------
 # Display Recommendations
-# ─────────────────────────────────────────────────────────────
+# -------------------------------------------------
 recommendations = st.session_state.recommendations
 
 if recommendations is not None:
 
     left_col, right_col = st.columns([2, 1])
 
-    # ───────────────── Left Side ─────────────────
     with left_col:
 
         st.subheader("Recommendations")
@@ -289,7 +308,6 @@ if recommendations is not None:
             use_container_width=True
         )
 
-    # ───────────────── Right Side ─────────────────
     with right_col:
 
         st.subheader("Which songs do you like?")
@@ -300,9 +318,7 @@ if recommendations is not None:
 
             for _, row in recommendations.iterrows():
 
-                label = (
-                    f"{row['artists']} - {row['name']}"
-                )
+                label = f"{row['artists']} - {row['name']}"
 
                 checked = st.checkbox(
                     label,
@@ -310,9 +326,7 @@ if recommendations is not None:
                 )
 
                 if checked:
-                    liked_song_ids.append(
-                        row["song_id"]
-                    )
+                    liked_song_ids.append(row["song_id"])
 
             submitted = st.form_submit_button(
                 "Submit Feedback"
@@ -321,26 +335,27 @@ if recommendations is not None:
             if submitted:
 
                 record = {
-                    "timestamp":
+                    "Timestamp":
                         datetime.now().strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
 
-                    "visitor_id":
+                    "Id":
                         st.session_state.visitor_id,
 
-                    "query_song":
+                    "QuerySong":
                         st.session_state.query_song,
 
-                    "recommended_song_ids":
+                    "selected_features":
+                        json.dumps(selected_features),
+
+                    "Recommendations":
                         json.dumps(
                             recommendations["song_id"].tolist()
                         ),
 
-                    "liked_song_ids":
-                        json.dumps(
-                            liked_song_ids
-                        )
+                    "Liked Songs":
+                        json.dumps(liked_song_ids)
                 }
 
                 sheet.append_row(
