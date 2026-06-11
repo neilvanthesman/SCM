@@ -1,160 +1,171 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import os
+import urllib.request
+import streamlit as st
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
-import urllib.request
-import os
-import sys
 
-pip install streamlit
+# ── Page Configuration ──────────────────────────────────────────────────────
+st.set_page_config(
+    page_title="Spotify Song Recommender",
+    page_icon="🎵",
+    layout="wide"
+)
 
-# ── Download spotify.csv if not already present ──────────────────────────────
-CSV_URL  = "https://raw.githubusercontent.com/neilvanthesman/Machine-Learning/refs/heads/main/spotify.csv"
-CSV_PATH = os.path.join(os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__), "spotify.csv")
+st.title("🎵 Spotify Song Recommender")
+st.write(
+    "Get similar songs based on audio features.\n\n"
+    "Songs by the same artist are excluded, and only songs with the same mode (major/minor) are considered."
+)
+
+# ── Download spotify.csv if not already present ─────────────────────────────
+CSV_URL = "https://raw.githubusercontent.com/neilvanthesman/Machine-Learning/refs/heads/main/spotify.csv"
+CSV_PATH = "spotify.csv"
 
 if not os.path.exists(CSV_PATH):
-    print("Downloading spotify.csv …")
-    urllib.request.urlretrieve(CSV_URL, CSV_PATH)
-    print("Download complete.")
+    with st.spinner("Downloading dataset..."):
+        urllib.request.urlretrieve(CSV_URL, CSV_PATH)
 
-data = pd.read_csv(CSV_PATH)
+# ── Load and Prepare Data ───────────────────────────────────────────────────
+@st.cache_data
+def load_data():
+    data = pd.read_csv(CSV_PATH)
 
-"""# EDA"""
+    audio_features = [
+        "energy",
+        "loudness",
+        "acousticness"
+    ]
 
-all_audio_features = [
-    'danceability', 'energy', 'key', 'loudness', 'mode',
-    'valence', 'tempo', 'speechiness',
-    'acousticness', 'instrumentalness', 'liveness'
-]
+    # Fill missing values
+    data[audio_features] = data[audio_features].fillna(0)
+    data["artists"] = data["artists"].fillna("")
 
-Numerical_audio_features = [
-    'danceability', 'energy', 'loudness',
-    'valence', 'tempo', 'speechiness',
-    'acousticness', 'instrumentalness', 'liveness'
-]
+    # Clean artist column
+    data["artists"] = (
+        data["artists"]
+        .str.replace("['", "", regex=False)
+        .str.replace("']", "", regex=False)
+        .str.replace("'", "", regex=False)
+    )
 
-# mode is intentionally excluded from similarity features —
-# it is used as a hard filter in Stage 2 instead
-audio_features = [#'danceability',
-                  'energy',
-                  'loudness',
-                  #'valence',
-                  #'tempo',
-                  'acousticness']
+    # Create combined name
+    data["combined_name"] = data["artists"] + " <> " + data["name"]
 
-data[audio_features] = data[audio_features].fillna(0)
-# data['artist_genres'] = data['artist_genres'].fillna('')
-data['artists'] = data['artists'].fillna('')
+    # Remove duplicates
+    data = data.drop_duplicates(subset=["combined_name"]).reset_index(drop=True)
 
-# Clean the artists column by removing brackets and quotes
-data['artists'] = data['artists'].str.replace("['", "", regex=False).str.replace("']", "", regex=False).str.replace("'", "", regex=False)
+    # Scale audio features
+    scaler = StandardScaler()
+    audio_matrix = scaler.fit_transform(data[audio_features])
 
-# Update the combined_name to reflect the cleaned artist names
-data['combined_name'] = data['artists'] + ' <> ' + data['name']
+    return data, audio_matrix
 
-# Drop duplicates based on the newly created 'combined_name'
-data = data.drop_duplicates(subset=['combined_name']).reset_index(drop=True)
 
-scaler = StandardScaler()
-audio_matrix = scaler.fit_transform(data[audio_features])
+data, audio_matrix = load_data()
 
-# Reset index so positional indexing stays consistent
-data = data.reset_index(drop=True)
-
+# ── Recommendation Function ─────────────────────────────────────────────────
 def get_recommendations(combined_name_query, top_n=10):
-    """
-    Three-stage recommendation:
-      Stage 1: Exclude songs by the same artist      (diversity filter)
-      Stage 2: Exclude songs with a different mode   (mood filter)
-      Stage 3: Rank remaining by audio cosine similarity
 
-    Query format: 'Artist <> Track Title'
-    Example:      'Coldplay <> Yellow'
-    """
-    matches = data[data['combined_name'].str.lower() == combined_name_query.lower()]
+    matches = data[
+        data["combined_name"].str.lower() == combined_name_query.lower()
+    ]
 
     if matches.empty:
-        print(f"Song not found: '{combined_name_query}'")
-        print("Tip: use format 'Artist <> Track Title'")
         return None
 
-    idx           = matches.index[0]
-    origin_artist = data.loc[idx, 'artists'].lower()
-    origin_mode   = data.loc[idx, 'mode']
+    idx = matches.index[0]
+    origin_artist = data.loc[idx, "artists"].lower()
+    origin_mode = data.loc[idx, "mode"]
 
-    # ── Stage 1: filter out same-artist tracks ───────────────────────
-    candidate_mask = data['artists'].str.lower() != origin_artist
+    # Stage 1: exclude same artist
+    candidate_mask = data["artists"].str.lower() != origin_artist
 
-    # ── Stage 2: filter out different-mode tracks ────────────────────
-    candidate_mask = candidate_mask & (data['mode'] == origin_mode)
+    # Stage 2: same mode only
+    candidate_mask &= (data["mode"] == origin_mode)
 
     candidate_idx = data[candidate_mask].index.tolist()
 
     if len(candidate_idx) == 0:
-        print('No candidates remain after filtering. Try a different song.')
         return None
 
-    # ── Stage 3: cosine similarity on audio features only ────────────
-    query_vec      = audio_matrix[idx].reshape(1, -1)
+    # Stage 3: cosine similarity
+    query_vec = audio_matrix[idx].reshape(1, -1)
     candidate_vecs = audio_matrix[candidate_idx]
 
-    sims = cosine_similarity(query_vec, candidate_vecs)[0]
+    similarities = cosine_similarity(query_vec, candidate_vecs)[0]
 
-    top_local_idx  = sims.argsort()[::-1][:top_n]
+    top_local_idx = similarities.argsort()[::-1][:top_n]
     top_global_idx = [candidate_idx[i] for i in top_local_idx]
-    top_scores     = sims[top_local_idx]
+    top_scores = similarities[top_local_idx]
 
     recommendations = data.iloc[top_global_idx][
-        ['combined_name', 'name', 'artists', 'mode']
+        ["artists", "name", "mode"]
     ].copy()
-    recommendations['similarity_score'] = top_scores
+
+    recommendations["similarity_score"] = top_scores
     recommendations = recommendations.reset_index(drop=True)
 
     return recommendations
 
-import streamlit as st
 
-st.set_page_config(page_title="Spotify Song Recommender")
+# ── User Interface ──────────────────────────────────────────────────────────
+col1, col2 = st.columns(2)
 
-st.title("🎵 Spotify Song Recommender")
-st.write("Enter a song using the format:")
+with col1:
+    artist = st.text_input(
+        "Artist",
+        placeholder="Coldplay"
+    )
 
-st.code("Artist <> Track Title")
+with col2:
+    song = st.text_input(
+        "Song Title",
+        placeholder="Yellow"
+    )
 
-query = st.text_input(
-    "Song Query",
-    placeholder="Coldplay <> Yellow"
+top_n = st.slider(
+    "Number of recommendations",
+    min_value=1,
+    max_value=20,
+    value=10
 )
 
-top_n = st.slider("Number of recommendations", 1, 20, 10)
+# ── Recommendation Button ───────────────────────────────────────────────────
+if st.button("Recommend Songs"):
 
-if st.button("Recommend"):
+    if artist == "" or song == "":
+        st.warning("Please fill in both Artist and Song Title.")
 
-    recommendations = get_recommendations(query, top_n)
+    else:
+        query = f"{artist} <> {song}"
 
-    if recommendations is not None:
-        st.success("Recommendations found!")
+        recommendations = get_recommendations(query, top_n)
 
-        display_df = recommendations[
-            ["combined_name", "similarity_score"]
-        ].copy()
+        if recommendations is None:
+            st.error("Song not found or no recommendations available.")
+            st.info("Example: Artist = Coldplay, Song = Yellow")
 
-        display_df["similarity_score"] = (
-            display_df["similarity_score"]
-            .round(3)
-        )
+        else:
+            st.success(f"Top {top_n} recommendations")
 
-        st.dataframe(display_df)
+            display_df = recommendations.copy()
+            display_df["similarity_score"] = (
+                display_df["similarity_score"].round(3)
+            )
 
-        csv = recommendations.to_csv(index=False)
+            st.dataframe(
+                display_df,
+                use_container_width=True
+            )
 
-        st.download_button(
-            "Download CSV",
-            csv,
-            file_name="recommendations.csv",
-            mime="text/csv"
-        )
+            csv = recommendations.to_csv(index=False)
+
+            st.download_button(
+                label="📥 Download CSV",
+                data=csv,
+                file_name="recommendations.csv",
+                mime="text/csv"
+            )
