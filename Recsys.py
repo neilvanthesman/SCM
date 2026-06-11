@@ -167,7 +167,8 @@ def get_recommendations(combined_name_query, top_n=10):
 
     recommendations = data.iloc[top_global_idx].copy()
 
-    recommendations["song_id"] = top_global_idx
+    # Use Spotify IDs already present in the dataset
+    recommendations["song_id"] = recommendations["id"]
 
     return recommendations
 
