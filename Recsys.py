@@ -298,12 +298,19 @@ if recommendations is not None:
     with left_col:
 
         st.subheader("Recommendations")
-
         for _, row in recommendations.iterrows():
-            st.markdown( f"##### {row['name']}" ) 
-            
-            st.caption( f"by {row['artists']}" )
+        
+            with st.container(border=True):
+        
+                st.markdown(
+                    f"####  {row['name']}"
+                )
+        
+                st.caption(
+                    f"by {row['artists']}"
+                )
 
+    
     with right_col:
 
         st.subheader("Which songs do you like?")
