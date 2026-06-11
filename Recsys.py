@@ -301,15 +301,17 @@ if recommendations is not None:
 
         for _, row in recommendations.iterrows():
         
-            with st.container(border=True):
+        with st.container(border=True):
         
-                st.markdown(
-                    f"#### {row['name']}"
-                )
-        
-                st.caption(
-                    f"by {row['artists']}"
-                )
+            st.markdown(
+                f"""
+        <h4 style="margin-bottom:0;">🎵 {row['name']}</h4>
+        <p style="margin-top:0;color:gray;">
+        by {row['artists']}
+        </p>
+        """,
+                unsafe_allow_html=True
+            )
 
     with right_col:
 
